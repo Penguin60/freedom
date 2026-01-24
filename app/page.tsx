@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useState, type CSSProperties, useRef } from "react";
 
 const dateFormat = new Intl.DateTimeFormat("en-US", {
   month: "short",
@@ -53,6 +53,10 @@ const normalizeRange = (start: number, end: number) => {
 const formatDate = (date: Date) => dateFormat.format(date);
 
 const ProgressBar = ({ item, now }: { item: ProgressItem; now: number }) => {
+  const [unit, setUnit] = useState<"days" | "hours" | "seconds">("days");
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  
   const startMs = item.start.getTime();
   const endMs = item.end.getTime();
   const normalized = normalizeRange(startMs, endMs);
@@ -60,10 +64,32 @@ const ProgressBar = ({ item, now }: { item: ProgressItem; now: number }) => {
   const elapsed = clamp(now - normalized.start, 0, total);
   const ratio = total === 0 ? 0 : elapsed / total;
   const percent = Math.round(ratio * 1000) / 10;
-  const daysLeft = Math.max(
-    0,
-    Math.ceil((normalized.end - now) / (1000 * 60 * 60 * 24))
-  );
+  
+  const timeLeftMs = Math.max(0, normalized.end - now);
+  const daysLeft = Math.ceil(timeLeftMs / (1000 * 60 * 60 * 24));
+  const hoursLeft = Math.ceil(timeLeftMs / (1000 * 60 * 60));
+  const secondsLeft = Math.ceil(timeLeftMs / 1000);
+
+  const options: { value: "days" | "hours" | "seconds"; label: string }[] = [
+    { value: "days", label: `${daysLeft} days left` },
+    { value: "hours", label: `${hoursLeft} hours left` },
+    { value: "seconds", label: `${secondsLeft} seconds left` },
+  ];
+
+  const currentLabel = options.find(opt => opt.value === unit)?.label;
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [isOpen]);
 
   return (
     <article className="row" style={{ "--accent": item.accent } as CSSProperties}>
@@ -81,7 +107,32 @@ const ProgressBar = ({ item, now }: { item: ProgressItem; now: number }) => {
         <div className="progress-fill" style={{ width: `${percent}%` }} />
       </div>
       <div className="meta">
-        <span>{daysLeft} days left</span>
+        <div className="dropdown" ref={dropdownRef}>
+          <button
+            className="dropdown-button"
+            onClick={() => setIsOpen(!isOpen)}
+            aria-label="Time left in different units"
+            aria-expanded={isOpen}
+          >
+            {currentLabel}
+          </button>
+          {isOpen && (
+            <div className="dropdown-menu">
+              {options.map(option => (
+                <button
+                  key={option.value}
+                  className={`dropdown-option ${option.value === unit ? "active" : ""}`}
+                  onClick={() => {
+                    setUnit(option.value);
+                    setIsOpen(false);
+                  }}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </article>
   );
