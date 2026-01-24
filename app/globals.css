@@ -226,18 +226,18 @@ body {
 
 .footer-made {
   font-size: 0.75rem;
-  color: var(--muted);
+  color: var(--ink);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .footer-made:hover {
-  color: var(--ink);
+  color: #0071e3;
 }
 
 .footer-contrib {
   font-size: 0.75rem;
-  color: var(--ink);
+  color: var(--muted);
   text-decoration: none;
   transition: color 0.2s ease;
 }
