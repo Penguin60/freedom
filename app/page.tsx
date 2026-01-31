@@ -167,7 +167,7 @@ export default function Home() {
   useEffect(() => {
     const interval = setInterval(() => {
       setNow(Date.now());
-    }, 60_000);
+    }, 1_000);
 
     return () => clearInterval(interval);
   }, []);
@@ -184,10 +184,24 @@ export default function Home() {
         ))}
       </section>
       <footer className="footer">
-        <a className="credit" href="https://ethanyanxu.com" rel="noreferrer">
-          <span className="credit-text">Made with ❤️ by Ethan Yan Xu</span>
-          <span className="credit-sheen" aria-hidden="true" />
-        </a>
+        <div className="footer-inner">
+          <a
+            className="footer-made"
+            href="https://ethanyanxu.com"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Made with ❤️ by Ethan Yan Xu
+          </a>
+          <a
+            className="footer-contrib"
+            href="https://www.rrashed.com/dean"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            With contributions from Radean Rashed Mohassel
+          </a>
+        </div>
       </footer>
     </main>
   );
